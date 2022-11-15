@@ -24,6 +24,8 @@ var Usage = func() {
 }
 
 func main() {
+	cntflg := flag.Int("cnt", 10, "how many results to return")
+
 	flag.Usage = Usage
 	flag.Parse()
 
@@ -47,9 +49,13 @@ func main() {
 	}
 	comparisons := calcSimilarity(filename, images)
 	fmt.Println("Score\tFilename")
+	cnt := 0
 	for _, comp := range comparisons {
-		//fmt.Println(comp.Score, "\t", comp.FileName)
 		fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
+		cnt += 1
+		if cnt >= *cntflg {
+			break
+		}
 	}
 	if updated {
 		err = data.SaveCorpus(images)
