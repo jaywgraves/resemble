@@ -25,6 +25,7 @@ var Usage = func() {
 
 func main() {
 	cntflg := flag.Int("cnt", 10, "how many results to return")
+	quietflg := flag.Bool("quiet", false, "print just the file names in double quotes to account for spaces.")
 
 	flag.Usage = Usage
 	flag.Parse()
@@ -48,10 +49,16 @@ func main() {
 		panic(err)
 	}
 	comparisons := calcSimilarity(filename, images)
-	fmt.Println("Score\tFilename")
+	if !*quietflg {
+		fmt.Println("Score\tFilename")
+	}
 	cnt := 0
 	for _, comp := range comparisons {
-		fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
+		if !*quietflg {
+			fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
+		} else {
+			fmt.Printf("\"%s\" ", comp.FileName)
+		}
 		cnt += 1
 		if cnt >= *cntflg {
 			break
