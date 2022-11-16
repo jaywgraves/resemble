@@ -8,6 +8,7 @@ import (
 	"resemble/data"
 	"resemble/models"
 	"sort"
+	"strings"
 
 	"github.com/ajdnik/imghash/similarity"
 )
@@ -57,7 +58,8 @@ func main() {
 		if !*quietflg {
 			fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
 		} else {
-			fmt.Printf("\"%s\" ", comp.FileName)
+			qfilename := strings.ReplaceAll(comp.FileName, " ", "\\ ")
+			fmt.Printf("\"%s\" ", qfilename)
 		}
 		cnt += 1
 		if cnt >= *cntflg {
