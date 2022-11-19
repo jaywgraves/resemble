@@ -79,7 +79,6 @@ func calcSimilarity(filename string, corpus models.ImageCorpus) models.Compariso
 		comparisons[i] = models.Comparison{Score: d, FileName: k}
 		i += 1
 	}
-	// reverse sort
 	sort.Sort(comparisons)
 	return comparisons
 }
