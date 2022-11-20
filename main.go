@@ -6,10 +6,7 @@ import (
 	"fmt"
 	"os"
 	"resemble/data"
-	"resemble/models"
-	"sort"
-
-	"github.com/ajdnik/imghash/similarity"
+	"resemble/scoring"
 )
 
 func FileExists(filename string) bool {
@@ -47,7 +44,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	comparisons := calcBinarySimilarity(filename, images)
+	comparisons := scoring.CalcBinarySimilarity(filename, images)
 	fmt.Println("Score\tFilename")
 	cnt := 0
 	for _, comp := range comparisons {
@@ -63,22 +60,4 @@ func main() {
 			panic(err)
 		}
 	}
-}
-
-func calcBinarySimilarity(filename string, corpus models.ImageCorpus) models.BinaryComparisons {
-	count := len(corpus.Images)
-	comparisons := models.NewBinaryComparisons(count - 1)
-	hash := corpus.Images[filename].PHash
-	i := 0
-	for k, v := range corpus.Images {
-		// no reason to check similarity vs self
-		if filename == k {
-			continue
-		}
-		d := float64(similarity.Hamming(hash, v.PHash))
-		comparisons[i] = models.BinaryComparison{Score: d, FileName: k}
-		i += 1
-	}
-	sort.Sort(comparisons)
-	return comparisons
 }
