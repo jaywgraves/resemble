@@ -22,6 +22,7 @@ var Usage = func() {
 
 func main() {
 	cntflg := flag.Int("cnt", 10, "how many results to return")
+	htflg := flag.String("hashtype", "P", "which hash type to use for similarity check")
 
 	flag.Usage = Usage
 	flag.Parse()
@@ -38,13 +39,19 @@ func main() {
 		Usage()
 		return
 	}
+	ht := *htflg
+	err := scoring.ValidateRequestedHashType(ht)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
 
 	images, _ := data.LoadCorpus()
 	images, updated, err := data.RefreshCorpus(images)
 	if err != nil {
 		panic(err)
 	}
-	comparisons := scoring.CalcBinarySimilarity("P", filename, images)
+	comparisons := scoring.CalcBinarySimilarity(ht, filename, images)
 	fmt.Println("Score\tFilename")
 	cnt := 0
 	for _, comp := range comparisons {

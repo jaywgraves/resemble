@@ -1,6 +1,7 @@
 package scoring
 
 import (
+	"errors"
 	"resemble/models"
 	"sort"
 
@@ -44,6 +45,17 @@ func CalcBinarySimilarity(hashType string, filename string, corpus models.ImageC
 	}
 	sort.Sort(comparisons)
 	return comparisons
+}
+
+var ErrInvalidHashType = errors.New("invalid hashtype requested")
+
+func ValidateRequestedHashType(hashType string) error {
+	switch hashType {
+	case "P", "A", "D", "M", "MH", "BM":
+		return nil
+	default:
+		return ErrInvalidHashType
+	}
 }
 
 func getRequestedHashValue(hashType string, img models.Image) []byte {
