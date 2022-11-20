@@ -18,23 +18,23 @@ func NewImageCorpus() ImageCorpus {
 	return ImageCorpus{Images: make(map[string]Image)}
 }
 
-type Comparison struct {
+type BinaryComparison struct {
 	Score    float64
 	FileName string
 }
 
-type Comparisons []Comparison
+type BinaryComparisons []BinaryComparison
 
-func (s Comparisons) Len() int {
+func (s BinaryComparisons) Len() int {
 	return len(s)
 }
-func (s Comparisons) Swap(i, j int) {
+func (s BinaryComparisons) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-func (s Comparisons) Less(i, j int) bool {
+func (s BinaryComparisons) Less(i, j int) bool {
 	return s[i].Score < s[j].Score
 }
 
-func NewComparisons(length int) Comparisons {
-	return make(Comparisons, length)
+func NewBinaryComparisons(length int) BinaryComparisons {
+	return make(BinaryComparisons, length)
 }

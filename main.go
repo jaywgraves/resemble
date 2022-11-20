@@ -47,7 +47,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	comparisons := calcSimilarity(filename, images)
+	comparisons := calcBinarySimilarity(filename, images)
 	fmt.Println("Score\tFilename")
 	cnt := 0
 	for _, comp := range comparisons {
@@ -65,9 +65,9 @@ func main() {
 	}
 }
 
-func calcSimilarity(filename string, corpus models.ImageCorpus) models.Comparisons {
+func calcBinarySimilarity(filename string, corpus models.ImageCorpus) models.BinaryComparisons {
 	count := len(corpus.Images)
-	comparisons := models.NewComparisons(count - 1)
+	comparisons := models.NewBinaryComparisons(count - 1)
 	hash := corpus.Images[filename].PHash
 	i := 0
 	for k, v := range corpus.Images {
@@ -76,7 +76,7 @@ func calcSimilarity(filename string, corpus models.ImageCorpus) models.Compariso
 			continue
 		}
 		d := float64(similarity.Hamming(hash, v.PHash))
-		comparisons[i] = models.Comparison{Score: d, FileName: k}
+		comparisons[i] = models.BinaryComparison{Score: d, FileName: k}
 		i += 1
 	}
 	sort.Sort(comparisons)
