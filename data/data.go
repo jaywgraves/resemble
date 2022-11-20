@@ -10,6 +10,7 @@ import (
 	"resemble/models"
 	"resemble/phash"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -66,10 +67,13 @@ func isImage(filename string) bool {
 }
 
 func RefreshCorpus(corpus models.ImageCorpus) (models.ImageCorpus, bool, error) {
-	var updated bool
+	var recalc, updated bool
 	newcorpus := models.NewImageCorpus()
 	newcorpus.Version = corpus.Version
 	newcorpus.LastRefreshTime = corpus.LastRefreshTime
+	var newCorpusLock sync.RWMutex
+	var hashWG sync.WaitGroup
+	hashSemaphore := make(chan struct{}, 10) // just a guess at number of concurrent goroutines
 
 	// walk image files
 	err := filepath.Walk(".", func(p string, info os.FileInfo, err error) error {
@@ -85,27 +89,42 @@ func RefreshCorpus(corpus models.ImageCorpus) (models.ImageCorpus, bool, error) 
 			return nil
 		}
 		// check corpus by filename
+		recalc = false
 		img, fnd := corpus.Images[p]
 		if fnd {
 			if info.Size() == img.SizeBytes && info.ModTime() == img.ModTime {
 				// still exists and didn't change
 			} else {
 				// still exists but changed.  re-calc hash
-				updated = true
-				img.PHash = phash.GetPHash(p)
+				recalc = true
 			}
 		} else {
 			// file exists but is new
-			updated = true
+			recalc = true
 			img = models.Image{
 				SizeBytes: info.Size(),
 				ModTime:   info.ModTime(),
-				PHash:     phash.GetPHash(p),
 			}
 		}
-		newcorpus.Images[p] = img
+		if recalc {
+			updated = true
+		}
+		hashWG.Add(1)
+		go func() {
+			defer hashWG.Done()
+			// this will block
+			hashSemaphore <- struct{}{}
+			defer func() {
+				<-hashSemaphore
+			}()
+			phash.CalcHashes(p, &img)
+			newCorpusLock.Lock()
+			newcorpus.Images[p] = img
+			newCorpusLock.Unlock()
+		}()
 		return nil
 	})
+	hashWG.Wait()
 	if updated {
 		newcorpus.LastRefreshTime = time.Now()
 	}
