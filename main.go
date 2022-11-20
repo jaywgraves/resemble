@@ -15,7 +15,7 @@ func FileExists(filename string) bool {
 }
 
 var Usage = func() {
-	fmt.Fprint(os.Stderr, "Given an image, find similar images in the same directory")
+	fmt.Fprintln(os.Stderr, "Given an image, find similar images in the same directory")
 	fmt.Fprintf(os.Stderr, "Usage:  %s filename \n\n", os.Args[0])
 	flag.PrintDefaults()
 }
@@ -35,7 +35,7 @@ func main() {
 
 	filename := flag.Args()[0]
 	if !FileExists(filename) {
-		fmt.Fprintf(os.Stderr, "Missing filename given as argument.\n")
+		fmt.Fprintln(os.Stderr, "Missing filename given as argument.")
 		Usage()
 		return
 	}
@@ -43,6 +43,7 @@ func main() {
 	err := scoring.ValidateRequestedHashType(ht)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		Usage()
 		return
 	}
 
