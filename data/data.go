@@ -89,7 +89,6 @@ func RefreshCorpus(corpus models.ImageCorpus) (models.ImageCorpus, bool, error) 
 		if fnd {
 			if info.Size() == img.SizeBytes && info.ModTime() == img.ModTime {
 				// still exists and didn't change
-				newcorpus.Images[p] = img
 			} else {
 				// still exists but changed.  re-calc hash
 				updated = true
