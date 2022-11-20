@@ -44,7 +44,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	comparisons := scoring.CalcBinarySimilarity(filename, images)
+	comparisons := scoring.CalcBinarySimilarity("P", filename, images)
 	fmt.Println("Score\tFilename")
 	cnt := 0
 	for _, comp := range comparisons {
