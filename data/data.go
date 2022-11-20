@@ -108,24 +108,28 @@ func RefreshCorpus(corpus models.ImageCorpus) (models.ImageCorpus, bool, error) 
 		}
 		if recalc {
 			updated = true
-		}
-		hashWG.Add(1)
-		go func() {
-			defer hashWG.Done()
-			// this will block
-			hashSemaphore <- struct{}{}
-			defer func() {
-				<-hashSemaphore
+			hashWG.Add(1)
+			go func() {
+				defer hashWG.Done()
+				// this will block
+				hashSemaphore <- struct{}{}
+				defer func() {
+					<-hashSemaphore
+				}()
+				phash.CalcHashes(p, &img)
+				newCorpusLock.Lock()
+				newcorpus.Images[p] = img
+				newCorpusLock.Unlock()
 			}()
-			phash.CalcHashes(p, &img)
+		} else {
 			newCorpusLock.Lock()
 			newcorpus.Images[p] = img
 			newCorpusLock.Unlock()
-		}()
+		}
 		return nil
 	})
-	hashWG.Wait()
 	if updated {
+		hashWG.Wait()
 		newcorpus.LastRefreshTime = time.Now()
 	}
 	return newcorpus, updated, err
