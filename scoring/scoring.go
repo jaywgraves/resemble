@@ -4,6 +4,7 @@ import (
 	"errors"
 	"resemble/models"
 	"sort"
+	"strings"
 
 	"github.com/ajdnik/imghash/similarity"
 )
@@ -50,6 +51,7 @@ func CalcBinarySimilarity(hashType string, filename string, corpus models.ImageC
 var ErrInvalidHashType = errors.New("invalid hashtype requested")
 
 func ValidateRequestedHashType(hashType string) error {
+	hashType = strings.ToUpper(hashType)
 	switch hashType {
 	case "P", "A", "D", "M", "MH", "BM":
 		return nil
@@ -59,6 +61,7 @@ func ValidateRequestedHashType(hashType string) error {
 }
 
 func getRequestedHashValue(hashType string, img models.Image) []byte {
+	hashType = strings.ToUpper(hashType)
 	switch hashType {
 	case "P":
 		return img.PHash
