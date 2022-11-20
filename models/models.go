@@ -12,6 +12,13 @@ type Image struct {
 	SizeBytes int64
 	ModTime   time.Time
 	PHash     []byte
+	AHash     []byte
+	DHash     []byte
+	MHash     []byte
+	CMHash    []float64
+	MHHash    []byte
+	BMHash    []byte
+	RVHash    []uint8
 }
 
 func NewImageCorpus() ImageCorpus {
