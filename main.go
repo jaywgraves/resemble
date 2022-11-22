@@ -9,6 +9,11 @@ import (
 	"resemble/scoring"
 )
 
+var (
+	version    string = ".01"
+	versionSHA string
+)
+
 func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return !errors.Is(err, os.ErrNotExist)
@@ -23,9 +28,15 @@ var Usage = func() {
 func main() {
 	cntflg := flag.Int("cnt", 10, "how many results to return")
 	htflg := flag.String("hashtype", "P", "which hash type to use for similarity check")
+	versionflg := flag.Bool("version", false, "show version")
 
 	flag.Usage = Usage
 	flag.Parse()
+
+	if *versionflg == true {
+		fmt.Fprintf(os.Stderr, "%s version %s-%s\n", os.Args[0], version, versionSHA)
+		return
+	}
 
 	if flag.NArg() != 1 {
 		fmt.Fprintf(os.Stderr, "No filename given as argument.\n")
