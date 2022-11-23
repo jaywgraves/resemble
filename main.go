@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	version    string = ".01"
+	version    string = ".02"
 	versionSHA string
 )
 
@@ -26,35 +26,57 @@ var Usage = func() {
 }
 
 func main() {
-	cntflg := flag.Int("cnt", 10, "how many results to return")
-	htflg := flag.String("hashtype", "P", "which hash type to use for similarity check")
-	versionflg := flag.Bool("version", false, "show version")
+	var ht, filename string
+	versionCmd := flag.NewFlagSet("version", flag.ExitOnError)
+	versionCmd.Usage = Usage
+	matchCmd := flag.NewFlagSet("match", flag.ExitOnError)
+	matchCmd.Usage = Usage
+	cntFlg := matchCmd.Int("cnt", 10, "how many results to return")
+	htFlg1 := matchCmd.String("hashtype", "P", "which hash type to use for similarity check")
 
-	flag.Usage = Usage
-	flag.Parse()
+	duplicatesCmd := flag.NewFlagSet("duplicates", flag.ExitOnError)
+	duplicatesCmd.Usage = Usage
+	htFlg2 := duplicatesCmd.String("hashtype", "P", "which hash type to use for similarity check")
 
-	if *versionflg == true {
+	if len(os.Args) < 2 {
+		Usage()
+		os.Exit(1)
+	}
+
+	switch os.Args[1] {
+	case "version":
+		versionCmd.Parse(os.Args[2:])
 		fmt.Fprintf(os.Stderr, "%s version %s-%s\n", os.Args[0], version, versionSHA)
 		return
-	}
-
-	if flag.NArg() != 1 {
-		fmt.Fprintf(os.Stderr, "No filename given as argument.\n")
-		Usage()
-		return
-	}
-
-	filename := flag.Args()[0]
-	if !FileExists(filename) {
-		fmt.Fprintln(os.Stderr, "Missing filename given as argument.")
-		Usage()
-		return
-	}
-	ht := *htflg
-	err := scoring.ValidateRequestedHashType(ht)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		Usage()
+	case "match":
+		matchCmd.Parse(os.Args[2:])
+		if matchCmd.NArg() != 1 {
+			fmt.Fprintf(os.Stderr, "No filename given as argument.\n")
+			Usage()
+			return
+		}
+		filename = matchCmd.Args()[0]
+		if !FileExists(filename) {
+			fmt.Fprintln(os.Stderr, "Invalid filename given as argument.")
+			Usage()
+			return
+		}
+		ht = *htFlg1
+		err := scoring.ValidateRequestedHashType(ht)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			Usage()
+			return
+		}
+	case "duplicates":
+		ht := *htFlg2
+		err := scoring.ValidateRequestedHashType(ht)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			Usage()
+			return
+		}
+		fmt.Fprintln(os.Stderr, "not yet implementd")
 		return
 	}
 
@@ -69,7 +91,7 @@ func main() {
 	for _, comp := range comparisons {
 		fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
 		cnt += 1
-		if cnt >= *cntflg {
+		if cnt >= *cntFlg {
 			break
 		}
 	}
