@@ -134,3 +134,18 @@ func RefreshCorpus(corpus models.ImageCorpus) (models.ImageCorpus, bool, error) 
 	}
 	return newcorpus, updated, err
 }
+
+func LoadRefreshSave() models.ImageCorpus {
+	images, _ := LoadCorpus()
+	images, updated, err := RefreshCorpus(images)
+	if err != nil {
+		panic(err)
+	}
+	if updated {
+		err = SaveCorpus(images)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return images
+}

@@ -68,6 +68,17 @@ func main() {
 			Usage()
 			return
 		}
+		images := data.LoadRefreshSave()
+		comparisons := scoring.CalcBinarySimilarity(ht, filename, images)
+		fmt.Println("Score\tFilename")
+		cnt := 0
+		for _, comp := range comparisons {
+			fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
+			cnt += 1
+			if cnt >= *cntFlg {
+				break
+			}
+		}
 	case "duplicates":
 		ht := *htFlg2
 		err := scoring.ValidateRequestedHashType(ht)
@@ -78,27 +89,9 @@ func main() {
 		}
 		fmt.Fprintln(os.Stderr, "not yet implementd")
 		return
+	default:
+		fmt.Fprintln(os.Stderr, "subcommand not valid")
+
 	}
 
-	images, _ := data.LoadCorpus()
-	images, updated, err := data.RefreshCorpus(images)
-	if err != nil {
-		panic(err)
-	}
-	comparisons := scoring.CalcBinarySimilarity(ht, filename, images)
-	fmt.Println("Score\tFilename")
-	cnt := 0
-	for _, comp := range comparisons {
-		fmt.Printf("%d\t%s\n", int(comp.Score), comp.FileName)
-		cnt += 1
-		if cnt >= *cntFlg {
-			break
-		}
-	}
-	if updated {
-		err = data.SaveCorpus(images)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
